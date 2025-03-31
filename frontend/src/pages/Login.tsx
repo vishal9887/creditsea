@@ -78,32 +78,39 @@ const useInputValidation = (initialValue: string) => {
 };
 
 const useFileHandler = (type: "single" | "multiple") => {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
+  const [file, setFile] = useState<File | File[] | null>(null);
+  const [preview, setPreview] = useState<string | string[]>("");
   const [error, setError] = useState<string>("");
 
   const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
-
-    if (!selectedFile) {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
       setError("Please select a file");
       return;
     }
 
     const MAX_SIZE = 1024 * 1024; // 1MB
-    if (selectedFile.size > MAX_SIZE) {
-      setError("File size should be less than 1MB");
-      return;
-    }
+    const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
 
-    if (!selectedFile.type.startsWith("image/")) {
+    if (imageFiles.length === 0) {
       setError("Please select an image file");
       return;
     }
 
-    setFile(selectedFile);
+    if (imageFiles.some((file) => file.size > MAX_SIZE)) {
+      setError("Each file should be less than 1MB");
+      return;
+    }
+
+    if (type === "single") {
+      setFile(imageFiles[0]);
+      setPreview(URL.createObjectURL(imageFiles[0]));
+    } else {
+      setFile(imageFiles);
+      setPreview(imageFiles.map((file) => URL.createObjectURL(file)));
+    }
+
     setError("");
-    setPreview(URL.createObjectURL(selectedFile));
   };
 
   return { file, preview, error, changeHandler };
