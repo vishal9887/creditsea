@@ -77,9 +77,9 @@ const useInputValidation = (initialValue: string) => {
   return { value, error, changeHandler, setValue: setValue2 };
 };
 
-const useFileHandler = (type: "single" | "multiple") => {
-  const [file, setFile] = useState<File | File[] | null>(null);
-  const [preview, setPreview] = useState<string | string[]>("");
+const useFileHandler = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -90,31 +90,26 @@ const useFileHandler = (type: "single" | "multiple") => {
     }
 
     const MAX_SIZE = 1024 * 1024; // 1MB
-    const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    const selectedFile = files[0];
 
-    if (imageFiles.length === 0) {
+    if (!selectedFile.type.startsWith("image/")) {
       setError("Please select an image file");
       return;
     }
 
-    if (imageFiles.some((file) => file.size > MAX_SIZE)) {
-      setError("Each file should be less than 1MB");
+    if (selectedFile.size > MAX_SIZE) {
+      setError("File size should be less than 1MB");
       return;
     }
 
-    if (type === "single") {
-      setFile(imageFiles[0]);
-      setPreview(URL.createObjectURL(imageFiles[0]));
-    } else {
-      setFile(imageFiles);
-      setPreview(imageFiles.map((file) => URL.createObjectURL(file)));
-    }
-
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
     setError("");
   };
 
   return { file, preview, error, changeHandler };
 };
+
 
 // User role types
 type UserRole = "user" | "admin" | "verifier" | null;
