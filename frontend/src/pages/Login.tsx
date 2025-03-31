@@ -126,7 +126,7 @@ const Login: React.FC<LoginProps> = () => {
   const name = useInputValidation("");
   const email = useInputValidation("");
   const password = useInputValidation("");
-  const avatar = useFileHandler("single");
+  const avatar = useFileHandler();
   // Handle role selection
   const handleRoleSelection = (role: UserRole) => {
     if (role === selectedRole) {
